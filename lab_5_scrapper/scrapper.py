@@ -219,7 +219,7 @@ def make_request(url: str, config: Config) -> requests.models.Response:
     headers = config.headers
     timeout = config.timeout
 
-    response = requests.get(headers=headers, timeout=timeout)
+    response = requests.get(url=url, headers=headers, timeout=timeout)
 
     return response
 
@@ -336,7 +336,7 @@ class HTMLParser:
             article_soup (bs4.BeautifulSoup): BeautifulSoup instance
         """
         self.article.title = article_soup.title.text
-        self.article.author = article_soup.find(class_='article__author').text
+        self.article.author.append(article_soup.find(class_='article__author').text)
 
         date_str = article_soup.find(class_='article__date').text
         self.article.date = self.unify_date_format(date_str)
