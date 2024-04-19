@@ -2,23 +2,23 @@
 Crawler implementation.
 """
 # pylint: disable=too-many-arguments, too-many-instance-attributes, unused-import, undefined-variable
-import pathlib
-from pathlib import Path
-import requests
+from typing import Pattern, Union
+import datetime
 import json
 import re
-import shutil
 from random import randrange
 from time import sleep
+
+import requests
 from bs4 import BeautifulSoup
-import datetime
+import shutil
+import pathlib
+from pathlib import Path
 
 from core_utils import constants
 from core_utils.config_dto import ConfigDTO
 from core_utils.article.article import Article
 from core_utils.article.io import to_raw, to_meta
-
-from typing import Pattern, Union
 
 
 class IncorrectSeedURLError(Exception):
