@@ -1,9 +1,20 @@
 {
-    "seed_urls": [],
-    "headers": {},
-    "total_articles_to_find_and_parse": 0,
-    "encoding": "",
-    "timeout": 0,
+    "seed_urls": [
+        "https://baikal24.ru/",
+        "https://baikal24.ru/?page=2",
+        "https://baikal24.ru/?page=3",
+        "https://baikal24.ru/?page=4",
+        "https://baikal24.ru/?page=5",
+        "https://baikal24.ru/?page=6"
+    ],
+    "headers": {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "ACCEPT": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "DEVICE-MEMORY": "8", "REFERER": "https://www.google.com/", "SEC-CH-PREFERS-REDUCED-MOTION": "no-preference"
+    },
+    "total_articles_to_find_and_parse": 10,
+    "encoding": "utf-8",
+    "timeout": 2,
     "should_verify_certificate": true,
     "headless_mode": true
 }
