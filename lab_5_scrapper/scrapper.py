@@ -62,6 +62,12 @@ class IncorrectVerifyError(Exception):
     """
 
 
+class IncorrectHeadlessError(Exception):
+    """
+    Headless mode certificate value must bool
+    """
+
+
 class Config:
     """
     Class for unpacking and validating configurations.
@@ -115,28 +121,36 @@ class Config:
         """
         if not(
                 all(isinstance(url, str) and re.fullmatch('https?://(www.)?', url) for url in self.seed_urls
-                    )):
+                    ) and isinstance(self.seed_urls, list)):
             raise IncorrectSeedURLError
 
         if not isinstance(self.total_articles, int):
             raise IncorrectNumberOfArticlesError
 
-        if self.total_articles not in range(1, 150):
+        if not(
+                self.total_articles in range(1, 150) and isinstance(self.total_articles, int)
+        ):
             raise NumberOfArticlesOutOfRangeError
 
-        if not isinstance(self.headers, dict):
+        if not (
+                isinstance(self.headers, dict)
+                and all(isinstance(key, str) and isinstance(value, str) for key, value in self.headers.items())
+            ):
             raise IncorrectHeadersError
 
         if not isinstance(self.encoding, str):
             raise IncorrectEncodingError
 
         if not(
-            isinstance(self.timeout, int) and self.timeout in range(1, 60)
+            isinstance(self.timeout, int) and self.timeout in range(0, 60)
         ):
             raise IncorrectTimeoutError
 
         if not isinstance(self.should_verify_certificate, bool):
             raise IncorrectVerifyError
+
+        if not isinstance(self.headless_mode, bool):
+            raise IncorrectHeadlessError
 
 
     def get_seed_urls(self) -> list[str]:
