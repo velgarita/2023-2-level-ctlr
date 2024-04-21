@@ -445,10 +445,6 @@ def main() -> None:
         article_id = index + 1
         html_parser = HTMLParser(full_url=url, article_id=article_id, config=configuration)
         article = html_parser.parse()
-        if not (
-                article.title and article.date and article.text
-        ):
-            continue
 
         if isinstance(article, Article):
             to_raw(article)
