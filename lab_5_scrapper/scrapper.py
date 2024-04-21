@@ -284,19 +284,23 @@ class Crawler:
         """
         seed_urls = self.get_search_urls()
 
-        while len(self.urls) < self.config.get_num_articles():
+        for seed_url in seed_urls:
+            response = make_request(seed_url, self.config)
+            if not response.ok:
+                continue
 
-            for seed_url in seed_urls:
-                response = make_request(seed_url, self.config)
-                if not response.ok:
-                    continue
+            article_soap = BeautifulSoup(response.text, features='html.parser')
+            new_url = self._extract_url(article_soap)
 
-                article_soap = BeautifulSoup(response.text, features='html.parser')
+
+            while new_url:
+                if len(self.urls) == self.config.get_num_articles():
+                    break
+                self.urls.append(new_url)
                 new_url = self._extract_url(article_soap)
 
-                while new_url:
-                    self.urls.append(new_url)
-                    new_url = self._extract_url(article_soap)
+            if len(self.urls) == self.config.get_num_articles():
+                break
 
 
     def get_search_urls(self) -> list:
