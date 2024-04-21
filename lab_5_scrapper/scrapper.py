@@ -77,15 +77,15 @@ class Config:
         self.path_to_config = path_to_config
         self._validate_config_content()
 
-        config = self._extract_config_content()
+        self.config = self._extract_config_content()
 
-        self.seed_urls = config.seed_urls
-        self.total_articles = config.total_articles
-        self.headers = config.headers
-        self.encoding = config.encoding
-        self.timeout = config.timeout
-        self.should_verify_certificate = config.should_verify_certificate
-        self.headless_mode = config.headless_mode
+        self.seed_urls = self.config.seed_urls
+        self.total_articles = self.config.total_articles
+        self.headers = self.config.headers
+        self.encoding = self.config.encoding
+        self.timeout = self.config.timeout
+        self.should_verify_certificate = self.config.should_verify_certificate
+        self.headless_mode = self.config.headless_mode
 
 
     def _extract_config_content(self) -> ConfigDTO:
