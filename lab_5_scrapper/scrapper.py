@@ -146,7 +146,7 @@ class Config:
         ):
             raise IncorrectTimeoutError
 
-        if not isinstance(self.should_verify_certificate, bool):
+        if self.should_verify_certificate not in (True, False):
             raise IncorrectVerifyError
 
         if not isinstance(self.headless_mode, bool):
