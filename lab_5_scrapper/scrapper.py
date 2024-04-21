@@ -377,7 +377,7 @@ class HTMLParser:
         Returns:
             datetime.datetime: Datetime object
         """
-        dt_object = datetime.datetime.strptime(date_str + ':00', '%Y-%m-%d %H:%M:%S')
+        dt_object = datetime.datetime.strptime(date_str, '%d.%m.%Y %H:%M')
 
         return dt_object
 
