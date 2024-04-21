@@ -294,10 +294,9 @@ class Crawler:
                 article_soap = BeautifulSoup(response.text, features='html.parser')
                 new_url = self._extract_url(article_soap)
 
-                if not new_url:
-                    continue
-
-                self.urls.append(new_url)
+                while new_url:
+                    self.urls.append(new_url)
+                    new_url = self._extract_url(article_soap)
 
 
     def get_search_urls(self) -> list:
@@ -357,7 +356,9 @@ class HTMLParser:
         Args:
             article_soup (bs4.BeautifulSoup): BeautifulSoup instance
         """
-        self.article.title = article_soup.title.text
+        title = article_soup.find(class_='article__title')
+        if title:
+            self.article.title = title
 
         author = article_soup.find(class_='article__author')
         if not author:
@@ -436,12 +437,14 @@ def main() -> None:
 
     all_urls = crawler.get_search_urls()
 
-    article_id_pattern = r'\d{2}-\d{2}-\d{4}/\d{3}/'
-
     for index, url in enumerate(all_urls):
         article_id = index + 1
         html_parser = HTMLParser(full_url=url, article_id=article_id, config=configuration)
         article = html_parser.parse()
+        if not (
+                article.title and article.date and article.text
+        ):
+            continue
 
         if isinstance(article, Article):
             to_raw(article)
