@@ -58,13 +58,7 @@ class IncorrectTimeoutError(Exception):
 
 class IncorrectVerifyError(Exception):
     """
-    Verify certificate value must bool
-    """
-
-
-class IncorrectHeadlessError(Exception):
-    """
-    Headless mode certificate value must bool
+    Verify certificate and Headless mode values must boolean
     """
 
 
@@ -119,38 +113,40 @@ class Config:
         """
         Ensure configuration parameters are not corrupt.
         """
+        config = self._extract_config_content()
+
         if not(
-                all(isinstance(url, str) and re.fullmatch('https?://(www.)?', url) for url in self.seed_urls
+                all(isinstance(url, str) and re.fullmatch('https?://(www.)?', url) for url in config.seed_urls
                     ) and isinstance(self.seed_urls, list)):
             raise IncorrectSeedURLError
 
-        if not isinstance(self.total_articles, int):
+        if not isinstance(config.total_articles, int):
             raise IncorrectNumberOfArticlesError
 
         if not(
-                self.total_articles in range(1, 150) and isinstance(self.total_articles, int)
+                config.total_articles in range(1, 150) and isinstance(config.total_articles, int)
         ):
             raise NumberOfArticlesOutOfRangeError
 
         if not (
-                isinstance(self.headers, dict)
-                and all(isinstance(key, str) and isinstance(value, str) for key, value in self.headers.items())
+                isinstance(config.headers, dict)
+                and all(isinstance(key, str) and isinstance(value, str) for key, value in config.headers.items())
             ):
             raise IncorrectHeadersError
 
-        if not isinstance(self.encoding, str):
+        if not isinstance(config.encoding, str):
             raise IncorrectEncodingError
 
         if not(
-            isinstance(self.timeout, int) and self.timeout in range(0, 60)
+            isinstance(config.timeout, int) and config.timeout in range(0, 60)
         ):
             raise IncorrectTimeoutError
 
-        if self.should_verify_certificate not in (True, False):
+        if not (
+            isinstance(config.should_verify_certificate, bool)
+            and isinstance(config.headless_mode, bool)
+        ):
             raise IncorrectVerifyError
-
-        if not isinstance(self.headless_mode, bool):
-            raise IncorrectHeadlessError
 
 
     def get_seed_urls(self) -> list[str]:
