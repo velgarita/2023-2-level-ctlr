@@ -116,17 +116,19 @@ class Config:
         config = self._extract_config_content()
 
         if not(
-                all(isinstance(url, str) and re.fullmatch('https?://(www.)?', url) for url in config.seed_urls
-                    ) and isinstance(config.seed_urls, list)):
+                all(isinstance(url, str) and re.match('https?://(www.)?', url) for url in config.seed_urls)
+                and isinstance(config.seed_urls, list)):
             raise IncorrectSeedURLError
 
         if not (
             isinstance(config.total_articles, int)
             and config.total_articles > 0
-        ):
+        ) or isinstance(config.total_articles, bool):
             raise IncorrectNumberOfArticlesError
 
-        if not config.total_articles in range(1, 150):
+        if not (
+                1 < config.total_articles < 150
+        ):
             raise NumberOfArticlesOutOfRangeError
 
         if not (
@@ -139,13 +141,14 @@ class Config:
             raise IncorrectEncodingError
 
         if not(
-            isinstance(config.timeout, int) and config.timeout in range(0, 60)
+            isinstance(config.timeout, int)
+            and 0 <= config.timeout <= 60
         ):
             raise IncorrectTimeoutError
 
         if not (
-            config.headless_mode in (True, False)
-            and config.should_verify_certificate in (True, False)
+            isinstance(config.should_verify_certificate, bool)
+            and isinstance(config.headless_mode, bool)
         ):
             raise IncorrectVerifyError
 
