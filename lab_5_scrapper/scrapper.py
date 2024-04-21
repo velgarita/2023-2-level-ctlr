@@ -79,13 +79,13 @@ class Config:
 
         self.config = self._extract_config_content()
 
-        self.seed_urls = self.config.seed_urls
-        self.total_articles = self.config.total_articles
-        self.headers = self.config.headers
-        self.encoding = self.config.encoding
-        self.timeout = self.config.timeout
-        self.should_verify_certificate = self.config.should_verify_certificate
-        self.headless_mode = self.config.headless_mode
+        self._seed_urls = self.config.seed_urls
+        self._total_articles = self.config.total_articles
+        self._headers = self.config.headers
+        self._encoding = self.config.encoding
+        self._timeout = self.config.timeout
+        self._should_verify_certificate = self.config.should_verify_certificate
+        self._headless_mode = self.config.headless_mode
 
 
     def _extract_config_content(self) -> ConfigDTO:
@@ -161,7 +161,7 @@ class Config:
         Returns:
             list[str]: Seed urls
         """
-        return self.seed_urls
+        return self._seed_urls
 
     def get_num_articles(self) -> int:
         """
@@ -170,7 +170,7 @@ class Config:
         Returns:
             int: Total number of articles to scrape
         """
-        return self.total_articles
+        return self._total_articles
 
     def get_headers(self) -> dict[str, str]:
         """
@@ -179,7 +179,7 @@ class Config:
         Returns:
             dict[str, str]: Headers
         """
-        return self.headers
+        return self._headers
 
     def get_encoding(self) -> str:
         """
@@ -188,7 +188,7 @@ class Config:
         Returns:
             str: Encoding
         """
-        return self.encoding
+        return self._encoding
 
     def get_timeout(self) -> int:
         """
@@ -197,7 +197,7 @@ class Config:
         Returns:
             int: Number of seconds to wait for response
         """
-        return self.timeout
+        return self._timeout
 
     def get_verify_certificate(self) -> bool:
         """
@@ -206,7 +206,7 @@ class Config:
         Returns:
             bool: Whether to verify certificate or not
         """
-        return self.should_verify_certificate
+        return self._should_verify_certificate
 
     def get_headless_mode(self) -> bool:
         """
@@ -215,7 +215,7 @@ class Config:
         Returns:
             bool: Whether to use headless mode or not
         """
-        return self.headless_mode
+        return self._headless_mode
 
 
 def make_request(url: str, config: Config) -> requests.models.Response:
@@ -231,8 +231,8 @@ def make_request(url: str, config: Config) -> requests.models.Response:
     """
     sleep(randrange(3))
 
-    headers = config.headers
-    timeout = config.timeout
+    headers = config.get_headers()
+    timeout = config.get_timeout()
 
     response = requests.get(url=url, headers=headers, timeout=timeout)
 
@@ -301,7 +301,7 @@ class Crawler:
             list: seed_urls param
         """
 
-        return self.config.seed_urls
+        return self.config.get_seed_urls()
 
 
 # 10
