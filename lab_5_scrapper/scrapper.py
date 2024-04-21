@@ -358,7 +358,7 @@ class HTMLParser:
         """
         title = article_soup.find(class_='article__title')
         if title:
-            self.article.title = title
+            self.article.title = title.text
 
         author = article_soup.find(class_='article__author')
         if not author:
