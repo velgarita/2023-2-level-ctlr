@@ -117,15 +117,16 @@ class Config:
 
         if not(
                 all(isinstance(url, str) and re.fullmatch('https?://(www.)?', url) for url in config.seed_urls
-                    ) and isinstance(self.seed_urls, list)):
+                    ) and isinstance(config.seed_urls, list)):
             raise IncorrectSeedURLError
 
-        if not isinstance(config.total_articles, int):
+        if not (
+            isinstance(config.total_articles, int)
+            and config.total_articles > 0
+        ):
             raise IncorrectNumberOfArticlesError
 
-        if not(
-                config.total_articles in range(1, 150) and isinstance(config.total_articles, int)
-        ):
+        if not config.total_articles in range(1, 150):
             raise NumberOfArticlesOutOfRangeError
 
         if not (
@@ -143,8 +144,8 @@ class Config:
             raise IncorrectTimeoutError
 
         if not (
-            isinstance(config.should_verify_certificate, bool)
-            and isinstance(config.headless_mode, bool)
+            config.headless_mode in (True, False)
+            and config.should_verify_certificate in (True, False)
         ):
             raise IncorrectVerifyError
 
