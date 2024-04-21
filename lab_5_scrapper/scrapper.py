@@ -116,8 +116,9 @@ class Config:
         config = self._extract_config_content()
 
         if not(
-                all(isinstance(url, str) and re.match('https?://(www.)?', url) for url in config.seed_urls)
-                and isinstance(config.seed_urls, list)):
+                isinstance(config.seed_urls, list)
+                and all(re.match('https?://(www.)?', url) for url in config.seed_urls)
+        ):
             raise IncorrectSeedURLError
 
         if not (
