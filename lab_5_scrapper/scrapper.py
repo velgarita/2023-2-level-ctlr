@@ -432,9 +432,9 @@ def main() -> None:
 
     article_id_pattern = r'\d{2}-\d{2}-\d{4}/\d{3}/'
 
-    for url in all_urls:
-        article_id = str(re.search(article_id_pattern, url)).replace('/', '')
-        html_parser = HTMLParser(full_url=url, article_id=int(article_id), config=configuration)
+    for index, url in enumerate(all_urls):
+        article_id = index + 1
+        html_parser = HTMLParser(full_url=url, article_id=article_id, config=configuration)
         article = html_parser.parse()
 
         if isinstance(article, Article):
