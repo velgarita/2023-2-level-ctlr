@@ -80,7 +80,7 @@ class Config:
         self.config = self._extract_config_content()
 
         self._seed_urls = self.config.seed_urls
-        self._total_articles = self.config.total_articles
+        self._num_articles = self.config.total_articles
         self._headers = self.config.headers
         self._encoding = self.config.encoding
         self._timeout = self.config.timeout
@@ -170,7 +170,7 @@ class Config:
         Returns:
             int: Total number of articles to scrape
         """
-        return self._total_articles
+        return self._num_articles
 
     def get_headers(self) -> dict[str, str]:
         """
