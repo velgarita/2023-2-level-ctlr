@@ -6,7 +6,6 @@ import datetime
 import json
 import pathlib
 import re
-import shutil
 from random import randrange
 from time import sleep
 from typing import Pattern, Union
@@ -418,12 +417,10 @@ def prepare_environment(base_path: Union[pathlib.Path, str]) -> None:
         base_path (Union[pathlib.Path, str]): Path where articles stores
     """
 
-    if not base_path.is_dir():
-        base_path.mkdir(parents=True, exist_ok=True)
+    base_path.mkdir(parents=True, exist_ok=True)
 
-    if any(base_path.iterdir()):
-        shutil.rmtree(base_path)
-        base_path.mkdir(parents=True, exist_ok=True)
+    for file in base_path.iterdir():
+        file.unlink(missing_ok=True)
 
 
 def main() -> None:
