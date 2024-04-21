@@ -367,7 +367,7 @@ class HTMLParser:
 
         date_str = article_soup.find(class_='article__date')
         if date_str:
-            self.article.date = self.unify_date_format(date_str)
+            self.article.date = self.unify_date_format(date_str.text)
 
         tags = article_soup.find_all(class_='article__tag')
         for tag in tags:
