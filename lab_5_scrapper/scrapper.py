@@ -256,6 +256,7 @@ class Crawler:
 
         self.config = config
         self.urls = []
+        self.url_pattern = 'https://baikal24.ru'
 
     def _extract_url(self, article_bs: BeautifulSoup) -> str:
         """
