@@ -295,7 +295,8 @@ class Crawler:
             while new_url:
                 if len(self.urls) == self.config.get_num_articles():
                     break
-                self.urls.append(new_url)
+                if new_url not in self.urls:
+                    self.urls.append(new_url)
                 new_url = self._extract_url(article_soap)
 
             if len(self.urls) == self.config.get_num_articles():
