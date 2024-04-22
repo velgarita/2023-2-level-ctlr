@@ -444,11 +444,9 @@ def main() -> None:
         html_parser = HTMLParser(full_url=url, article_id=article_id, config=configuration)
         article = html_parser.parse()
 
-        if article.title and article.date and article.text:
-
-            if isinstance(article, Article):
-                to_raw(article)
-                to_meta(article)
+        if isinstance(article, Article):
+            to_raw(article)
+            to_meta(article)
 
     print('Ready!')
     print(len(crawler.urls))
