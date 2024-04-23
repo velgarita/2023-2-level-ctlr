@@ -442,7 +442,7 @@ def main() -> None:
 
     crawler.find_articles()
 
-    all_urls = crawler.get_search_urls()
+    all_urls = crawler.urls
 
     for index, url in enumerate(all_urls):
         article_id = index + 1
