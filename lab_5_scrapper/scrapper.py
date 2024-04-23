@@ -288,16 +288,15 @@ class Crawler:
             if not response.ok:
                 continue
 
-            article_soap = BeautifulSoup(response.text, features='html.parser')
-            new_url = self._extract_url(article_soap)
+            article_soup = BeautifulSoup(response.text, features='html.parser')
+            new_url = self._extract_url(article_soup)
 
 
             while new_url:
                 if len(self.urls) == self.config.get_num_articles():
                     break
-                if new_url not in self.urls:
-                    self.urls.append(new_url)
-                new_url = self._extract_url(article_soap)
+                self.urls.append(new_url)
+                new_url = self._extract_url(article_soup)
 
             if len(self.urls) == self.config.get_num_articles():
                 break
