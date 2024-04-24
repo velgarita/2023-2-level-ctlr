@@ -22,43 +22,43 @@ from core_utils.config_dto import ConfigDTO
 
 class IncorrectSeedURLError(Exception):
     """
-    Seed URL does not match standard pattern
+    Seed URL does not match standard pattern.
     """
 
 
 class NumberOfArticlesOutOfRangeError(Exception):
     """
-    Total number of articles is out of range
+    Total number of articles is out of range.
     """
 
 
 class IncorrectNumberOfArticlesError(Exception):
     """
-    Total number of articles to parse is not integer
+    Total number of articles to parse is not integer.
     """
 
 
 class IncorrectHeadersError(Exception):
     """
-    Headers are not in a form of dictionary
+    Headers are not in a form of dictionary.
     """
 
 
 class IncorrectEncodingError(Exception):
     """
-    Encoding must be specified as a string
+    Encoding must be specified as a string.
     """
 
 
 class IncorrectTimeoutError(Exception):
     """
-    Timeout value must be a positive integer less than 60
+    Timeout value must be a positive integer less than 60.
     """
 
 
 class IncorrectVerifyError(Exception):
     """
-    Verify certificate and Headless mode values must boolean
+    Verify certificate and Headless mode values must be boolean.
     """
 
 
@@ -95,7 +95,7 @@ class Config:
         Returns:
             ConfigDTO: Config values
         """
-        with open(self.path_to_config, 'r', encoding='utf-8') as file:
+        with open(file=self.path_to_config, mode='r', encoding='utf-8') as file:
             config_content = json.load(file)
         return ConfigDTO(
             seed_urls=config_content['seed_urls'],
@@ -117,7 +117,7 @@ class Config:
 
         if not(
                 isinstance(config.seed_urls, list)
-                and all(re.match('https?://(www.)?', url) for url in config.seed_urls)
+                and all(re.match('https:\/\/baikal24\.ru\/(?:\?page=)?\d*', url) for url in config.seed_urls)
         ):
             raise IncorrectSeedURLError
 
@@ -127,9 +127,7 @@ class Config:
         ) or isinstance(config.total_articles, bool):
             raise IncorrectNumberOfArticlesError
 
-        if not (
-                1 < config.total_articles < 150
-        ):
+        if config.total_articles < 1 or config.total_articles > 150:
             raise NumberOfArticlesOutOfRangeError
 
         if not (
@@ -234,9 +232,7 @@ def make_request(url: str, config: Config) -> requests.models.Response:
     headers = config.get_headers()
     timeout = config.get_timeout()
 
-    response = requests.get(url=url, headers=headers, timeout=timeout)
-
-    return response
+    return requests.get(url=url, headers=headers, timeout=timeout)
 
 
 class Crawler:
@@ -287,23 +283,25 @@ class Crawler:
         """
         seed_urls = self.get_search_urls()
 
-        for seed_url in seed_urls:
-            response = make_request(seed_url, self.config)
-            if not response.ok:
-                continue
+        while len(self.urls) < self.config.get_num_articles():
 
-            article_soup = BeautifulSoup(response.text, features='html.parser')
-            new_url = self._extract_url(article_soup)
+            for seed_url in seed_urls:
+                response = make_request(seed_url, self.config)
+                if not response.ok:
+                    continue
 
-
-            while new_url:
-                if len(self.urls) == self.config.get_num_articles():
-                    break
-                self.urls.append(new_url)
+                article_soup = BeautifulSoup(response.text, features='lxml')
                 new_url = self._extract_url(article_soup)
 
-            if len(self.urls) == self.config.get_num_articles():
-                break
+
+                while new_url:
+                    if len(self.urls) == self.config.get_num_articles():
+                        break
+                    if new_url in self.urls:
+                        continue
+
+                    self.urls.append(new_url)
+                    new_url = self._extract_url(article_soup)
 
 
     def get_search_urls(self) -> list:
@@ -391,9 +389,7 @@ class HTMLParser:
         Returns:
             datetime.datetime: Datetime object
         """
-        dt_object = datetime.datetime.strptime(date_str, '%d.%m.%Y %H:%M')
-
-        return dt_object
+        return datetime.datetime.strptime(date_str, '%d.%m.%Y %H:%M')
 
 
     def parse(self) -> Union[Article, bool, list]:
@@ -422,8 +418,7 @@ def prepare_environment(base_path: Union[pathlib.Path, str]) -> None:
     """
     if not base_path.is_dir():
         base_path.mkdir(parents=True, exist_ok=True)
-
-    if any(base_path.iterdir()):
+    elif base_path.exists():
         shutil.rmtree(base_path)
         base_path.mkdir(parents=True, exist_ok=True)
 
@@ -454,7 +449,6 @@ def main() -> None:
             to_meta(article)
 
     print('Ready!')
-    print(len(crawler.urls))
 
 
 if __name__ == "__main__":
