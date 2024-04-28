@@ -97,15 +97,7 @@ class Config:
         """
         with open(file=self.path_to_config, mode='r', encoding='utf-8') as file:
             config_content = json.load(file)
-        return ConfigDTO(
-            seed_urls=config_content['seed_urls'],
-            total_articles_to_find_and_parse=config_content['total_articles_to_find_and_parse'],
-            headers=config_content['headers'],
-            encoding=config_content['encoding'],
-            timeout=config_content['timeout'],
-            should_verify_certificate=config_content['should_verify_certificate'],
-            headless_mode=config_content['headless_mode']
-        )
+        return ConfigDTO(**{key: config_content[key] for key in config_content.keys()})
 
 
 
@@ -349,8 +341,7 @@ class HTMLParser:
         texts = []
         if main_div:
             all_ps = main_div.find_all('p', class_='article__text')
-            for p in all_ps:
-                texts.append(p.text)
+            texts = [p.text for p in all_ps]
 
         self.article.text = ''.join(texts)
 
@@ -402,7 +393,7 @@ class HTMLParser:
 
         response = make_request(self.full_url, self.config)
         if response.ok:
-            article_bs = BeautifulSoup(response.text, features='html.parser')
+            article_bs = BeautifulSoup(response.text, features='lxml')
             self._fill_article_with_text(article_bs)
             self._fill_article_with_meta_information(article_bs)
 
@@ -416,11 +407,9 @@ def prepare_environment(base_path: Union[pathlib.Path, str]) -> None:
     Args:
         base_path (Union[pathlib.Path, str]): Path where articles stores
     """
-    if not base_path.is_dir():
-        base_path.mkdir(parents=True, exist_ok=True)
-    elif base_path.exists():
+    if base_path.exists():
         shutil.rmtree(base_path)
-        base_path.mkdir(parents=True, exist_ok=True)
+    base_path.mkdir(parents=True, exist_ok=True)
 
 
 def main() -> None:
@@ -437,9 +426,7 @@ def main() -> None:
 
     crawler.find_articles()
 
-    all_urls = crawler.urls
-
-    for index, url in enumerate(all_urls):
+    for index, url in enumerate(crawler.urls):
         article_id = index + 1
         html_parser = HTMLParser(full_url=url, article_id=article_id, config=configuration)
         article = html_parser.parse()
@@ -447,8 +434,6 @@ def main() -> None:
         if isinstance(article, Article):
             to_raw(article)
             to_meta(article)
-
-    print('Ready!')
 
 
 if __name__ == "__main__":
