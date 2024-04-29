@@ -97,7 +97,7 @@ class Config:
         """
         with open(file=self.path_to_config, mode='r', encoding='utf-8') as file:
             config_content = json.load(file)
-        return ConfigDTO(**{key: config_content[key] for key in config_content.keys()})
+        return ConfigDTO(**config_content)
 
 
 
@@ -107,39 +107,36 @@ class Config:
         """
         config = self._extract_config_content()
 
-        if not(
-                isinstance(config.seed_urls, list)
-                and all(re.match('https:\/\/baikal24\.ru\/(?:\?page=)?\d*', url) for url in config.seed_urls)
+        if (
+                not isinstance(config.seed_urls, list)
+                or not all(re.match('https:\/\/baikal24\.ru\/(?:\?page=)?\d*', url) for url in config.seed_urls)
         ):
             raise IncorrectSeedURLError
 
-        if not (
-            isinstance(config.total_articles, int)
-            and config.total_articles > 0
+        if (
+            not isinstance(config.total_articles, int)
+            or not config.total_articles > 0
         ) or isinstance(config.total_articles, bool):
             raise IncorrectNumberOfArticlesError
 
         if config.total_articles < 1 or config.total_articles > 150:
             raise NumberOfArticlesOutOfRangeError
 
-        if not (
-                isinstance(config.headers, dict)
-                and all(isinstance(key, str) and isinstance(value, str) for key, value in config.headers.items())
+        if (
+                not isinstance(config.headers, dict)
+                or not all(isinstance(key, str) and isinstance(value, str) for key, value in config.headers.items())
             ):
             raise IncorrectHeadersError
 
         if not isinstance(config.encoding, str):
             raise IncorrectEncodingError
 
-        if not(
-            isinstance(config.timeout, int)
-            and 0 <= config.timeout <= 60
-        ):
+        if (not isinstance(config.timeout, int)
+                or config.timeout < 0 or config.timeout > 60):
             raise IncorrectTimeoutError
 
-        if not (
-            isinstance(config.should_verify_certificate, bool)
-            and isinstance(config.headless_mode, bool)
+        if (not isinstance(config.should_verify_certificate, bool)
+            or not isinstance(config.headless_mode, bool)
         ):
             raise IncorrectVerifyError
 
@@ -219,7 +216,7 @@ def make_request(url: str, config: Config) -> requests.models.Response:
     Returns:
         requests.models.Response: A response from a request
     """
-    sleep(randrange(3))
+    # sleep(randrange(2))
 
     headers = config.get_headers()
     timeout = config.get_timeout()
@@ -360,7 +357,7 @@ class HTMLParser:
         if not author:
             self.article.author.append('NOT FOUND')
         else:
-            self.article.author.append(author.text)
+            self.article.author.append(author.text.strip())
 
         date_str = article_soup.find(class_='article__date')
         if date_str:
@@ -434,6 +431,8 @@ def main() -> None:
         if isinstance(article, Article):
             to_raw(article)
             to_meta(article)
+
+    print('Done!')
 
 
 if __name__ == "__main__":
