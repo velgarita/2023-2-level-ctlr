@@ -107,37 +107,28 @@ class Config:
         """
         config = self._extract_config_content()
 
-        if (
-                not isinstance(config.seed_urls, list)
-                or not all(re.match('https:\/\/baikal24\.ru\/(?:\?page=)?\d*', url) for url in config.seed_urls)
+        if not(
+                isinstance(config.seed_urls, list)
+                and all(re.match('https:\/\/baikal24\.ru\/(?:\?page=)?\d*', url) for url in config.seed_urls)
         ):
             raise IncorrectSeedURLError
 
-        if (
-            not isinstance(config.total_articles, int)
-            or not config.total_articles > 0
-        ) or isinstance(config.total_articles, bool):
+        if not isinstance(config.total_articles, int) or config.total_articles <= 0:
             raise IncorrectNumberOfArticlesError
 
         if config.total_articles < 1 or config.total_articles > 150:
             raise NumberOfArticlesOutOfRangeError
 
-        if (
-                not isinstance(config.headers, dict)
-                or not all(isinstance(key, str) and isinstance(value, str) for key, value in config.headers.items())
-            ):
+        if not isinstance(config.headers, dict):
             raise IncorrectHeadersError
 
         if not isinstance(config.encoding, str):
             raise IncorrectEncodingError
 
-        if (not isinstance(config.timeout, int)
-                or config.timeout < 0 or config.timeout > 60):
+        if not isinstance(config.timeout, int) or config.timeout < 0 or config.timeout > 60:
             raise IncorrectTimeoutError
 
-        if (not isinstance(config.should_verify_certificate, bool)
-            or not isinstance(config.headless_mode, bool)
-        ):
+        if not isinstance(config.should_verify_certificate, bool) or not isinstance(config.headless_mode, bool):
             raise IncorrectVerifyError
 
 
@@ -216,8 +207,6 @@ def make_request(url: str, config: Config) -> requests.models.Response:
     Returns:
         requests.models.Response: A response from a request
     """
-    # sleep(randrange(2))
-
     headers = config.get_headers()
     timeout = config.get_timeout()
 
@@ -272,25 +261,21 @@ class Crawler:
         """
         seed_urls = self.get_search_urls()
 
-        while len(self.urls) < self.config.get_num_articles():
+        for seed_url in seed_urls:
+            response = make_request(seed_url, self.config)
+            if not response.ok:
+                continue
 
-            for seed_url in seed_urls:
-                response = make_request(seed_url, self.config)
-                if not response.ok:
-                    continue
-
-                article_soup = BeautifulSoup(response.text, features='lxml')
+            article_soup = BeautifulSoup(response.text, features='lxml')
+            new_url = self._extract_url(article_soup)
+            while new_url:
+                if len(self.urls) == self.config.get_num_articles():
+                    break
+                self.urls.append(new_url)
                 new_url = self._extract_url(article_soup)
 
-
-                while new_url:
-                    if len(self.urls) == self.config.get_num_articles():
-                        break
-                    if new_url in self.urls:
-                        continue
-
-                    self.urls.append(new_url)
-                    new_url = self._extract_url(article_soup)
+            if len(self.urls) == self.config.get_num_articles():
+                break
 
 
     def get_search_urls(self) -> list:
