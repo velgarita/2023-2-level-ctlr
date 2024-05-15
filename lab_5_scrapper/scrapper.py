@@ -109,7 +109,8 @@ class Config:
 
         if not(
                 isinstance(config.seed_urls, list)
-                and all(re.match('https:\/\/baikal24\.ru\/(?:\?page=)?\d*', url) for url in config.seed_urls)
+                and all(re.match(r'https://baikal24\.ru/(?:\?page=)?\d*', url)
+                        for url in config.seed_urls)
         ):
             raise IncorrectSeedURLError
 
@@ -128,7 +129,8 @@ class Config:
         if not isinstance(config.timeout, int) or config.timeout < 0 or config.timeout > 60:
             raise IncorrectTimeoutError
 
-        if not isinstance(config.should_verify_certificate, bool) or not isinstance(config.headless_mode, bool):
+        if (not isinstance(config.should_verify_certificate, bool)
+                or not isinstance(config.headless_mode, bool)):
             raise IncorrectVerifyError
 
 
