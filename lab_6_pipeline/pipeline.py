@@ -3,6 +3,8 @@ Pipeline for CONLL-U formatting.
 """
 # pylint: disable=too-few-public-methods, unused-import, undefined-variable, too-many-nested-blocks
 import pathlib
+import spacy
+import spacy_udpipe
 
 try:
     from networkx import DiGraph
@@ -10,7 +12,7 @@ except ImportError:  # pragma: no cover
     DiGraph = None  # type: ignore
     print('No libraries installed. Failed to import.')
 
-from core_utils.article.article import Article, get_article_id_from_filepath
+from core_utils.article.article import Article, ArtifactType, get_article_id_from_filepath
 from core_utils.article import io
 from core_utils.pipeline import (AbstractCoNLLUAnalyzer, CoNLLUDocument, LibraryWrapper,
                                  PipelineProtocol, StanzaDocument, TreeNode)
@@ -125,6 +127,7 @@ class TextProcessingPipeline(PipelineProtocol):
             analyzer (LibraryWrapper | None): Analyzer instance
         """
         self._corpus = corpus_manager
+        self.analyzer = analyzer
 
 
     def run(self) -> None:
@@ -133,8 +136,16 @@ class TextProcessingPipeline(PipelineProtocol):
         """
         articles = self._corpus.get_articles()
 
-        for article in articles.values():
+        conllu_articles = []
+        if self.analyzer:
+            conllu_articles = self.analyzer.analyze(list(articles.values()))
+
+        for i, article in enumerate(articles.values()):
             io.to_cleaned(article)
+
+            if self.analyzer and conllu_articles:
+                article.set_conllu_info(conllu_articles[i])
+                self.analyzer.to_conllu(article)
 
 
 class UDPipeAnalyzer(LibraryWrapper):
@@ -148,6 +159,7 @@ class UDPipeAnalyzer(LibraryWrapper):
         """
         Initialize an instance of the UDPipeAnalyzer class.
         """
+        self._analyzer = self._bootstrap()
 
     def _bootstrap(self) -> AbstractCoNLLUAnalyzer:
         """
@@ -156,6 +168,12 @@ class UDPipeAnalyzer(LibraryWrapper):
         Returns:
             AbstractCoNLLUAnalyzer: Analyzer instance
         """
+        model = spacy_udpipe.load_from_path(lang="ru", path=str(constants.UDPIPE_MODEL_PATH))
+        model.add_pipe(factory_name="conll_formatter", last=True,
+                       config={"conversion_maps": {"XPOS": {"": "_"}}, "include_headers": True},)
+
+        return model
+
 
     def analyze(self, texts: list[str]) -> list[StanzaDocument | str]:
         """
@@ -167,6 +185,14 @@ class UDPipeAnalyzer(LibraryWrapper):
         Returns:
             list[StanzaDocument | str]: List of documents
         """
+        annotated_texts = []
+
+        for text in texts:
+            analyzed_text = self._analyzer(text)
+            conllu_annotation = analyzed_text._.conll_str
+            annotated_texts.append(str(conllu_annotation))
+
+        return annotated_texts
 
     def to_conllu(self, article: Article) -> None:
         """
@@ -175,6 +201,8 @@ class UDPipeAnalyzer(LibraryWrapper):
         Args:
             article (Article): Article containing information to save
         """
+        with open(file=article.get_file_path(kind=ArtifactType.UDPIPE_CONLLU), mode='w', encoding='utf-8') as file:
+            file.write(article.get_conllu_info())
 
 
 class StanzaAnalyzer(LibraryWrapper):
@@ -196,6 +224,7 @@ class StanzaAnalyzer(LibraryWrapper):
         Returns:
             AbstractCoNLLUAnalyzer: Analyzer instance
         """
+
 
     def analyze(self, texts: list[str]) -> list[StanzaDocument]:
         """
