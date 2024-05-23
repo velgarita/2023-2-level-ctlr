@@ -14,9 +14,9 @@ except ImportError:  # pragma: no cover
 
 from core_utils.article.article import Article, ArtifactType, get_article_id_from_filepath
 from core_utils.article import io
+from core_utils import constants
 from core_utils.pipeline import (AbstractCoNLLUAnalyzer, CoNLLUDocument, LibraryWrapper,
                                  PipelineProtocol, StanzaDocument, TreeNode)
-from core_utils import constants
 
 
 class InconsistentDatasetError(Exception):
@@ -97,9 +97,13 @@ class CorpusManager:
         """
         all_raw = self.path_to_raw_txt_data.glob(pattern='*_raw.txt')
 
-        for file in all_raw:
-            file_id = get_article_id_from_filepath(file)
-            self._storage[file_id] = io.from_raw(path=file, article=Article(url=None, article_id=file_id))
+        self._storage = {
+            get_article_id_from_filepath(file): io.from_raw(
+                path=file, article=Article(url=None, article_id=get_article_id_from_filepath(file))
+            )
+            for file in all_raw
+        }
+
 
     def get_articles(self) -> dict:
         """
@@ -185,12 +189,7 @@ class UDPipeAnalyzer(LibraryWrapper):
         Returns:
             list[StanzaDocument | str]: List of documents
         """
-        annotated_texts = []
-
-        for text in texts:
-            analyzed_text = self._analyzer(text)
-            conllu_annotation = analyzed_text._.conll_str
-            annotated_texts.append(str(conllu_annotation))
+        annotated_texts = [str(self._analyzer(text)._.conll_str) for text in texts]
 
         return annotated_texts
 
@@ -203,6 +202,7 @@ class UDPipeAnalyzer(LibraryWrapper):
         """
         with open(file=article.get_file_path(kind=ArtifactType.UDPIPE_CONLLU), mode='w', encoding='utf-8') as file:
             file.write(article.get_conllu_info())
+
 
 
 class StanzaAnalyzer(LibraryWrapper):
@@ -224,7 +224,6 @@ class StanzaAnalyzer(LibraryWrapper):
         Returns:
             AbstractCoNLLUAnalyzer: Analyzer instance
         """
-
 
     def analyze(self, texts: list[str]) -> list[StanzaDocument]:
         """
