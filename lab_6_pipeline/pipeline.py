@@ -3,7 +3,7 @@ Pipeline for CONLL-U formatting.
 """
 # pylint: disable=too-few-public-methods, unused-import, undefined-variable, too-many-nested-blocks
 import pathlib
-import spacy
+
 import spacy_udpipe
 
 try:
@@ -12,9 +12,9 @@ except ImportError:  # pragma: no cover
     DiGraph = None  # type: ignore
     print('No libraries installed. Failed to import.')
 
-from core_utils.article.article import Article, ArtifactType, get_article_id_from_filepath
-from core_utils.article import io
 from core_utils import constants
+from core_utils.article import io
+from core_utils.article.article import Article, ArtifactType, get_article_id_from_filepath
 from core_utils.pipeline import (AbstractCoNLLUAnalyzer, CoNLLUDocument, LibraryWrapper,
                                  PipelineProtocol, StanzaDocument, TreeNode)
 
