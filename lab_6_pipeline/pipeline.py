@@ -82,8 +82,8 @@ class CorpusManager:
         if meta_num != raw_num:
             raise InconsistentDatasetError
 
-        all_meta.sort(key=lambda x: get_article_id_from_filepath(x))
-        all_raw.sort(key=lambda x: get_article_id_from_filepath(x))
+        all_meta.sort(key=lambda x: int(get_article_id_from_filepath(x)))
+        all_raw.sort(key=lambda x: int(get_article_id_from_filepath(x)))
 
         for i, (meta, raw) in enumerate(zip(all_meta, all_raw), start=1):
             if meta.stat().st_size == 0 or raw.stat().st_size == 0:
@@ -205,7 +205,8 @@ class UDPipeAnalyzer(LibraryWrapper):
         Args:
             article (Article): Article containing information to save
         """
-        with open(file=article.get_file_path(kind=ArtifactType.UDPIPE_CONLLU), mode='w', encoding='utf-8') as file:
+        with open(file=article.get_file_path(
+                kind=ArtifactType.UDPIPE_CONLLU), mode='w', encoding='utf-8') as file:
             file.write(article.get_conllu_info())
 
 
@@ -312,7 +313,8 @@ class POSFrequencyPipeline:
             article.set_pos_info(self._count_frequencies(article))
             io.to_meta(article)
 
-            visualize(article=article, path_to_save=self._corpus.path_to_raw_txt_data / f'{i}_image.png')
+            visualize(article=article,
+                      path_to_save=self._corpus.path_to_raw_txt_data / f'{i}_image.png')
 
     def _count_frequencies(self, article: Article) -> dict[str, int]:
         """
