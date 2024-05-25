@@ -194,9 +194,7 @@ class UDPipeAnalyzer(LibraryWrapper):
         Returns:
             list[StanzaDocument | str]: List of documents
         """
-        annotated_texts = [f'{self._analyzer(text)._.conll_str}\n' for text in texts]
-
-        return annotated_texts
+        return [f'{self._analyzer(text)._.conll_str}\n' for text in texts]
 
     def to_conllu(self, article: Article) -> None:
         """
@@ -253,7 +251,7 @@ class StanzaAnalyzer(LibraryWrapper):
             list[StanzaDocument]: List of documents
         """
         model = self._analyzer
-        analyzed_texts = [model.process(Document(sentences=[], text=text)) for text in texts]
+        analyzed_texts = model.process([Document(sentences=[], text=text) for text in texts])
 
         return analyzed_texts
 
