@@ -398,6 +398,17 @@ def main() -> None:
     """
     Entrypoint for pipeline module.
     """
+    corpus_manager = CorpusManager(path_to_raw_txt_data=constants.ASSETS_PATH)
+
+    pipeline = TextProcessingPipeline(corpus_manager, UDPipeAnalyzer())
+    pipeline.run()
+
+    stanza_analyzer = StanzaAnalyzer()
+    pipeline = TextProcessingPipeline(corpus_manager, stanza_analyzer)
+    pipeline.run()
+
+    visualizer_pos = POSFrequencyPipeline(corpus_manager, stanza_analyzer)
+    visualizer_pos.run()
 
 
 if __name__ == "__main__":
